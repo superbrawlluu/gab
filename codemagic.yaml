@@ -9,8 +9,8 @@ workflows:
 
     scripts:
       - name: Install dependencies
-  script: |
-    npm install --legacy-peer-deps
+        script: |
+          npm install --legacy-peer-deps
 
       - name: Build web app
         script: |
@@ -22,7 +22,7 @@ workflows:
 
       - name: Init Capacitor
         script: |
-          npx cap init tweakempire com.tweakempire.app
+          npx cap init checklistapp com.checklist.app
 
       - name: Add iOS platform
         script: |
