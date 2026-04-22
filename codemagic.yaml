@@ -13,20 +13,30 @@ workflows:
           rm -rf node_modules package-lock.json
           npm install --legacy-peer-deps
 
-      - name: Build web app
+      # 🔥 BUILD GIUSTO
+      - name: Build web app (client)
         script: |
+          cd client
+          npm install --legacy-peer-deps
           npm run build
+          cd ..
 
-      - name: Setup Capacitor (webDir fix)
+      # 🔥 SPOSTA DIST
+      - name: Move build to root dist
+        script: |
+          rm -rf dist
+          cp -r client/dist ./dist
+
+      - name: Setup Capacitor
         script: |
           npm install @capacitor/core @capacitor/cli @capacitor/ios --legacy-peer-deps
           npx cap init checklistapp com.checklist.app --web-dir=dist || true
 
-      - name: Add iOS platform
+      - name: Add iOS
         script: |
           npx cap add ios
 
-      - name: Sync Capacitor (IMPORTANT)
+      - name: Sync Capacitor
         script: |
           npx cap sync ios
 
