@@ -8,7 +8,7 @@ workflows:
       xcode: latest
 
     scripts:
-      - name: Install dependencies
+      - name: Clean & install dependencies
         script: |
           rm -rf node_modules package-lock.json
           npm install --legacy-peer-deps
@@ -19,7 +19,7 @@ workflows:
 
       - name: Install Capacitor
         script: |
-          npm install @capacitor/core @capacitor/cli @capacitor/ios
+          npm install @capacitor/core @capacitor/cli @capacitor/ios --legacy-peer-deps
 
       - name: Init Capacitor
         script: |
@@ -29,18 +29,18 @@ workflows:
         script: |
           npx cap add ios
 
-      - name: Copy build
+      - name: Copy build to iOS
         script: |
           npx cap copy
 
-      - name: Build iOS
+      - name: Build iOS (no signing)
         script: |
           cd ios/App
           xcodebuild -workspace App.xcworkspace \
           -scheme App \
           -configuration Debug \
           -sdk iphoneos \
-          build
+          CODE_SIGNING_ALLOWED=NO
 
     artifacts:
-      - ios/App/build/**/*.ipa
+      - ios/App/build/**/*.app
