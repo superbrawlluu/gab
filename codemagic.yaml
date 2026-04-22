@@ -8,7 +8,7 @@ workflows:
       xcode: latest
 
     scripts:
-      - name: Clean & install dependencies
+      - name: Install dependencies
         script: |
           rm -rf node_modules package-lock.json
           npm install --legacy-peer-deps
@@ -25,33 +25,30 @@ workflows:
         script: |
           npx cap init checklistapp com.checklist.app
 
-      - name: Add iOS platform
+      - name: Add iOS
         script: |
           npx cap add ios
 
-      - name: FORCE iOS TARGET (REAL FIX)
-        script: |
-          cd ios/App
-
-          echo "Fix Podfile"
-          sed -i '' 's/platform :ios, .*/platform :ios, '\''14.0'\''/' Podfile || true
-
-          echo "Fix project.pbxproj (all occurrences)"
-          sed -i '' 's/IPHONEOS_DEPLOYMENT_TARGET = [0-9.]*/IPHONEOS_DEPLOYMENT_TARGET = 14.0/g' App.xcodeproj/project.pbxproj || true
-
-          echo "Fix Capacitor config"
-          if [ -f App/AppDelegate.swift ]; then
-            echo "iOS project detected"
-          fi
-
-      - name: Copy build to iOS
+      - name: Copy build
         script: |
           npx cap copy
 
-      - name: Install CocoaPods (clean)
+      - name: Fix Podfile
         script: |
           cd ios/App
-          pod deintegrate || true
+          cat <<EOF > Podfile
+platform :ios, '15.0'
+
+use_frameworks!
+
+target 'App' do
+  capacitor_pods
+end
+EOF
+
+      - name: Install Pods
+        script: |
+          cd ios/App
           pod install --repo-update
 
       - name: Build iOS
