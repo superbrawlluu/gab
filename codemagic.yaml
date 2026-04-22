@@ -25,7 +25,7 @@ workflows:
         script: |
           npx cap init checklistapp com.checklist.app
 
-      - name: Add iOS
+      - name: Add iOS platform
         script: |
           npx cap add ios
 
@@ -33,20 +33,16 @@ workflows:
         script: |
           npx cap copy
 
-      - name: Fix Podfile
+      - name: Fix Podfile (safe)
         script: |
           cd ios/App
-          cat <<EOF > Podfile
-platform :ios, '15.0'
+          echo "platform :ios, '15.0'" > Podfile
+          echo "" >> Podfile
+          echo "target 'App' do" >> Podfile
+          echo "  capacitor_pods" >> Podfile
+          echo "end" >> Podfile
 
-use_frameworks!
-
-target 'App' do
-  capacitor_pods
-end
-EOF
-
-      - name: Install Pods
+      - name: Install CocoaPods
         script: |
           cd ios/App
           pod install --repo-update
