@@ -25,7 +25,7 @@ workflows:
         script: |
           npx cap init checklistapp com.checklist.app
 
-      - name: Add iOS platform
+      - name: Add iOS
         script: |
           npx cap add ios
 
@@ -33,14 +33,12 @@ workflows:
         script: |
           npx cap copy
 
-      - name: Fix Podfile (safe)
+      # 🔥 FIX GIUSTO
+      - name: Fix deployment target
         script: |
           cd ios/App
-          echo "platform :ios, '15.0'" > Podfile
-          echo "" >> Podfile
-          echo "target 'App' do" >> Podfile
-          echo "  capacitor_pods" >> Podfile
-          echo "end" >> Podfile
+          sed -i '' 's/platform :ios, .*/platform :ios, '\''15.0'\''/' Podfile || true
+          sed -i '' 's/IPHONEOS_DEPLOYMENT_TARGET = [0-9.]*/IPHONEOS_DEPLOYMENT_TARGET = 15.0/g' App.xcodeproj/project.pbxproj || true
 
       - name: Install CocoaPods
         script: |
