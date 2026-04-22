@@ -33,18 +33,19 @@ workflows:
         script: |
           npx cap copy
 
-      - name: FORCE iOS 14 (FULL FIX)
+      - name: Force iOS 14 (FIX YAML)
         script: |
           cd ios/App
 
           echo "Fix Podfile..."
           sed -i '' 's/platform :ios, .*/platform :ios, '\''14.0'\''/' Podfile || true
 
-          echo "Fix project.pbxproj..."
+          echo "Fix project..."
           sed -i '' 's/IPHONEOS_DEPLOYMENT_TARGET = .*/IPHONEOS_DEPLOYMENT_TARGET = 14.0;/g' App.xcodeproj/project.pbxproj || true
 
-          echo "Force Pods target..."
-          echo "
+          echo "Aggiungo post_install..."
+          cat <<EOF >> Podfile
+
 post_install do |installer|
   installer.pods_project.targets.each do |target|
     target.build_configurations.each do |config|
@@ -52,19 +53,17 @@ post_install do |installer|
     end
   end
 end
-" >> Podfile
+
+EOF
 
       - name: Install CocoaPods
         script: |
           cd ios/App
           pod install
 
-      - name: Build iOS (FINAL)
+      - name: Build iOS
         script: |
           cd ios/App
-
-          echo "Build con xcodeproj"
-
           xcodebuild \
             -project App.xcodeproj \
             -scheme App \
