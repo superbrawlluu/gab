@@ -33,22 +33,21 @@ workflows:
         script: |
           npx cap copy
 
-      - name: Build iOS (auto scheme, no signing)
+      - name: Build iOS (project fix)
         script: |
           cd ios/App
 
-          echo "Lista schemes:"
-          xcodebuild -list
+          echo "File disponibili:"
+          ls
 
-          SCHEME=$(xcodebuild -list | grep -A 20 "Schemes:" | tail -n +2 | head -n 1 | xargs)
+          echo "Build con xcodeproj (fix scheme)"
 
-          echo "Uso scheme: $SCHEME"
-
-          xcodebuild -workspace App.xcworkspace \
-          -scheme "$SCHEME" \
-          -configuration Debug \
-          -sdk iphoneos \
-          CODE_SIGNING_ALLOWED=NO
+          xcodebuild \
+            -project App.xcodeproj \
+            -scheme App \
+            -configuration Debug \
+            -sdk iphoneos \
+            CODE_SIGNING_ALLOWED=NO
 
     artifacts:
       - ios/App/build/**/*.app
