@@ -12,30 +12,38 @@ workflows:
         script: |
           npm install --legacy-peer-deps || true
 
-      # 🔥 CREA DIST PRIMA DI TUTTO
-      - name: Create dist FIRST (CRUCIALE)
+      # 🔥 CREA DIST
+      - name: Create dist FIRST
         script: |
-          echo "Creo dist da client..."
-
           rm -rf dist
           mkdir dist
-
           cp -r client/* dist/
-
-          echo "Controllo dist:"
-          ls dist
 
           if [ ! -f dist/index.html ]; then
             echo "ERRORE: index.html non trovato!"
             exit 1
           fi
 
-      - name: Setup Capacitor
+      # 🔥 CREA CONFIG CAPACITOR CON iOS 15
+      - name: Create capacitor config
+        script: |
+          echo '{
+            "appId": "com.checklist.app",
+            "appName": "checklistapp",
+            "webDir": "dist",
+            "server": {
+              "iosScheme": "https"
+            },
+            "ios": {
+              "minVersion": "15.0"
+            }
+          }' > capacitor.config.json
+
+      - name: Install Capacitor
         script: |
           npm install @capacitor/core @capacitor/cli @capacitor/ios --legacy-peer-deps
-          npx cap init checklistapp com.checklist.app --web-dir=dist || true
 
-      # 🔥 ORA FUNZIONA
+      # 🔥 ORA NON FALLISCE
       - name: Add iOS platform
         script: |
           npx cap add ios
@@ -43,12 +51,6 @@ workflows:
       - name: Sync Capacitor
         script: |
           npx cap sync ios
-
-      - name: Fix iOS deployment target
-        script: |
-          cd ios/App
-          sed -i '' 's/platform :ios, .*/platform :ios, '\''15.0'\''/' Podfile || true
-          sed -i '' 's/IPHONEOS_DEPLOYMENT_TARGET = [0-9.]*/IPHONEOS_DEPLOYMENT_TARGET = 15.0/g' App.xcodeproj/project.pbxproj || true
 
       - name: Install CocoaPods
         script: |
