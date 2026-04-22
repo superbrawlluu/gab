@@ -33,11 +33,19 @@ workflows:
         script: |
           npx cap copy
 
-      - name: Build iOS (no signing)
+      - name: Build iOS (auto scheme, no signing)
         script: |
           cd ios/App
+
+          echo "Lista schemes:"
+          xcodebuild -list
+
+          SCHEME=$(xcodebuild -list | grep -A 20 "Schemes:" | tail -n +2 | head -n 1 | xargs)
+
+          echo "Uso scheme: $SCHEME"
+
           xcodebuild -workspace App.xcworkspace \
-          -scheme App \
+          -scheme "$SCHEME" \
           -configuration Debug \
           -sdk iphoneos \
           CODE_SIGNING_ALLOWED=NO
