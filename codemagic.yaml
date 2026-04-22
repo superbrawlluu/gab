@@ -33,12 +33,17 @@ workflows:
         script: |
           npx cap copy
 
+      - name: Fix iOS deployment target
+        script: |
+          cd ios/App
+          sed -i '' 's/platform :ios, .*/platform :ios, '\''13.0'\''/' Podfile
+
       - name: Install CocoaPods
         script: |
           cd ios/App
           pod install
 
-      - name: Build iOS (final fix)
+      - name: Build iOS (FINAL)
         script: |
           cd ios/App
           xcodebuild \
