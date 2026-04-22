@@ -17,24 +17,20 @@ workflows:
         script: |
           npm run build
 
-      - name: Install Capacitor
+      - name: Setup Capacitor (webDir fix)
         script: |
           npm install @capacitor/core @capacitor/cli @capacitor/ios --legacy-peer-deps
+          npx cap init checklistapp com.checklist.app --web-dir=dist || true
 
-      - name: Init Capacitor
-        script: |
-          npx cap init checklistapp com.checklist.app
-
-      - name: Add iOS
+      - name: Add iOS platform
         script: |
           npx cap add ios
 
-      - name: Copy build
+      - name: Sync Capacitor (IMPORTANT)
         script: |
-          npx cap copy
+          npx cap sync ios
 
-      # 🔥 FIX GIUSTO
-      - name: Fix deployment target
+      - name: Fix iOS deployment target
         script: |
           cd ios/App
           sed -i '' 's/platform :ios, .*/platform :ios, '\''15.0'\''/' Podfile || true
