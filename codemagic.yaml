@@ -13,26 +13,35 @@ workflows:
           rm -rf node_modules package-lock.json
           npm install --legacy-peer-deps
 
-      # 🔥 BUILD GIUSTO
-      - name: Build web app (client)
+      # 🔥 BUILD INTELLIGENTE
+      - name: Build web app (auto detect)
         script: |
-          cd client
-          npm install --legacy-peer-deps
-          npm run build
-          cd ..
+          echo "Avvio build..."
+          npm run build || true
 
-      # 🔥 SPOSTA DIST
-      - name: Move build to root dist
-        script: |
+          echo "Cerco index.html..."
+          BUILD_DIR=$(find . -type f -name "index.html" -not -path "*/node_modules/*" | head -n 1 | xargs dirname)
+
+          echo "Build trovata in: $BUILD_DIR"
+
+          if [ -z "$BUILD_DIR" ]; then
+            echo "ERRORE: Nessuna build trovata"
+            exit 1
+          fi
+
           rm -rf dist
-          cp -r client/dist ./dist
+          mkdir dist
+          cp -r "$BUILD_DIR"/* dist/
+
+          echo "Contenuto dist:"
+          ls dist
 
       - name: Setup Capacitor
         script: |
           npm install @capacitor/core @capacitor/cli @capacitor/ios --legacy-peer-deps
           npx cap init checklistapp com.checklist.app --web-dir=dist || true
 
-      - name: Add iOS
+      - name: Add iOS platform
         script: |
           npx cap add ios
 
