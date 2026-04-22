@@ -33,17 +33,16 @@ workflows:
         script: |
           npx cap copy
 
-      - name: Build iOS (project fix)
+      - name: Install CocoaPods
         script: |
           cd ios/App
+          pod install
 
-          echo "File disponibili:"
-          ls
-
-          echo "Build con xcodeproj (fix scheme)"
-
+      - name: Build iOS (final fix)
+        script: |
+          cd ios/App
           xcodebuild \
-            -project App.xcodeproj \
+            -workspace App.xcworkspace \
             -scheme App \
             -configuration Debug \
             -sdk iphoneos \
