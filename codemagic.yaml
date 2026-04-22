@@ -33,10 +33,26 @@ workflows:
         script: |
           npx cap copy
 
-      - name: Fix iOS deployment target
+      - name: FORCE iOS 14 (FULL FIX)
         script: |
           cd ios/App
-          sed -i '' 's/platform :ios, .*/platform :ios, '\''13.0'\''/' Podfile
+
+          echo "Fix Podfile..."
+          sed -i '' 's/platform :ios, .*/platform :ios, '\''14.0'\''/' Podfile || true
+
+          echo "Fix project.pbxproj..."
+          sed -i '' 's/IPHONEOS_DEPLOYMENT_TARGET = .*/IPHONEOS_DEPLOYMENT_TARGET = 14.0;/g' App.xcodeproj/project.pbxproj || true
+
+          echo "Force Pods target..."
+          echo "
+post_install do |installer|
+  installer.pods_project.targets.each do |target|
+    target.build_configurations.each do |config|
+      config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '14.0'
+    end
+  end
+end
+" >> Podfile
 
       - name: Install CocoaPods
         script: |
@@ -46,8 +62,11 @@ workflows:
       - name: Build iOS (FINAL)
         script: |
           cd ios/App
+
+          echo "Build con xcodeproj"
+
           xcodebuild \
-            -workspace App.xcworkspace \
+            -project App.xcodeproj \
             -scheme App \
             -configuration Debug \
             -sdk iphoneos \
