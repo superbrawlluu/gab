@@ -29,20 +29,30 @@ workflows:
         script: |
           npx cap add ios
 
+      - name: FORCE iOS TARGET (REAL FIX)
+        script: |
+          cd ios/App
+
+          echo "Fix Podfile"
+          sed -i '' 's/platform :ios, .*/platform :ios, '\''14.0'\''/' Podfile || true
+
+          echo "Fix project.pbxproj (all occurrences)"
+          sed -i '' 's/IPHONEOS_DEPLOYMENT_TARGET = [0-9.]*/IPHONEOS_DEPLOYMENT_TARGET = 14.0/g' App.xcodeproj/project.pbxproj || true
+
+          echo "Fix Capacitor config"
+          if [ -f App/AppDelegate.swift ]; then
+            echo "iOS project detected"
+          fi
+
       - name: Copy build to iOS
         script: |
           npx cap copy
 
-      - name: Force iOS 14 (SAFE FIX)
+      - name: Install CocoaPods (clean)
         script: |
           cd ios/App
-          sed -i '' 's/platform :ios, .*/platform :ios, '\''14.0'\''/' Podfile || true
-          sed -i '' 's/IPHONEOS_DEPLOYMENT_TARGET = .*/IPHONEOS_DEPLOYMENT_TARGET = 14.0;/g' App.xcodeproj/project.pbxproj || true
-
-      - name: Install CocoaPods
-        script: |
-          cd ios/App
-          pod install
+          pod deintegrate || true
+          pod install --repo-update
 
       - name: Build iOS
         script: |
