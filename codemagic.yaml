@@ -4,12 +4,13 @@ workflows:
     max_build_duration: 60
 
     environment:
-      node: 18
+      node: 20
       xcode: latest
 
     scripts:
       - name: Install dependencies
         script: |
+          rm -rf node_modules package-lock.json
           npm install --legacy-peer-deps
 
       - name: Build web app
